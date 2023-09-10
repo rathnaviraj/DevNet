@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import os
 import sys, getopt
 
+from handlers.data_handler_factory import DataHandlerFactory
+
 username = None
 repository = None
 
@@ -38,11 +40,10 @@ if not (username and repository and token):
     print(f'Missing required params [{token} - {username} - {repository}], stopping..')
     sys.exit()
 
+data_handler = DataHandlerFactory.get_data_handler('github')
 # Fetch contributors
-contributors_url = f'https://api.github.com/repos/{username}/{repository}/contributors'
-headers = {'Authorization': f'token {token}'}
-response = requests.get(contributors_url, headers=headers)
-contributors = [contributor['login'] for contributor in response.json()]
+contributor_data = data_handler({'token': token, 'username': username, 'repository': repository}).get_contributors()
+contributors = [contributor['login'] for contributor in contributor_data]
 
 # Create a directed graph
 G = nx.DiGraph()
